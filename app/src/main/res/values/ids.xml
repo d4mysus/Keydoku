@@ -1,0 +1,6 @@
+<resources>
+    <item name="sudoku_board" type="id" />
+    <item name="menu_screen" type="id" />
+    <item name="menu_title" type="id" />
+    <item name="status_strip" type="id" />
+</resources>
