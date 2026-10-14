@@ -5,10 +5,56 @@ import com.keydoku.domain.Difficulty
 import com.keydoku.domain.SudokuGenerator
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Test
 import kotlin.random.Random
 
 class GameControllerTest {
+    @Test
+    fun undoAndRedoPreserveElapsedTimeAndSettings() {
+        val controller = seededController()
+        controller.select(firstEditable(controller))
+        controller.updateElapsed(10_000L)
+        controller.enterDigit(4)
+        val settings = controller.state.settings.copy(sound = true)
+        controller.updateSettings(settings)
+        controller.updateElapsed(20_000L)
+        controller.undo()
+        assertEquals(20_000L, controller.state.elapsedMillis)
+        assertEquals(settings, controller.state.settings)
+        controller.updateElapsed(30_000L)
+        controller.redo()
+        assertEquals(30_000L, controller.state.elapsedMillis)
+        assertEquals(settings, controller.state.settings)
+    }
+
+    @Test
+    fun pausedHintDoesNotModifyPuzzleOrHistory() {
+        val controller = seededController()
+        controller.togglePause()
+        val before = controller.state
+        controller.hint()
+        assertEquals(before, controller.state)
+        assertFalse(controller.canUndo())
+    }
+
+    @Test
+    fun completionIsRecordedOnlyOnceAcrossUndoRedoAndRestore() {
+        val controller = seededController()
+        while (!controller.state.completed) controller.hint()
+        assertTrue(controller.recordCompletion())
+        controller.undo()
+        assertFalse(controller.recordCompletion())
+        controller.redo()
+        assertFalse(controller.recordCompletion())
+        val restored = seededController()
+        restored.restore(controller.state)
+        assertFalse(restored.recordCompletion())
+        restored.newGame(Difficulty.EASY)
+        while (!restored.state.completed) restored.hint()
+        assertTrue(restored.recordCompletion())
+    }
+
     @Test
     fun notesModeTogglesCandidatesWithoutSettingValue() {
         val controller = seededController()

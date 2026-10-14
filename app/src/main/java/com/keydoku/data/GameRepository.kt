@@ -56,6 +56,7 @@ class GameRepository(context: Context) {
             .put("elapsedMillis", state.elapsedMillis)
             .put("paused", state.paused)
             .put("completed", state.completed)
+            .put("completionRecorded", state.completionRecorded)
             .put("settings", JSONObject(encodeSettings(state.settings)))
             .toString()
 
@@ -73,6 +74,7 @@ class GameRepository(context: Context) {
                 elapsedMillis = json.optLong("elapsedMillis", 0L),
                 paused = json.optBoolean("paused", false),
                 completed = json.optBoolean("completed", false),
+                completionRecorded = json.optBoolean("completionRecorded", json.optBoolean("completed", false)),
                 settings = decodeSettings(json.optJSONObject("settings")?.toString()),
             )
         }.getOrNull()

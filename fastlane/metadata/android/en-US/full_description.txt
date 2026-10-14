@@ -1,0 +1,9 @@
+Keydoku is a free, offline Sudoku game designed for small Android keypad phones.
+
+Use the D-pad to move around the board, number keys to enter digits, * to toggle notes, and # for a hint. Touch can select cells and menu items. A physical keypad or keyboard is required for digit entry.
+
+Features include Easy, Medium, Hard, and Expert puzzles, notes, hints, undo and redo, a timer, and local statistics.
+
+No ads, accounts, analytics, or network permission. Game progress and settings stay on your device. Optional Bitcoin and Buy Me a Coffee donations support development and do not unlock any features.
+
+Source code is available under GPL-3.0-only.

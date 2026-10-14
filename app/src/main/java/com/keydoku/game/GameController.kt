@@ -78,6 +78,7 @@ class GameController(
     }
 
     fun hint(): GameState {
+        if (state.paused || state.completed) return state
         val targetIndex = if (state.current[state.selected] == SudokuBoard.EMPTY && canEditSelected()) {
             state.selected
         } else {
@@ -103,20 +104,34 @@ class GameController(
     fun undo(): GameState {
         if (undoStack.isEmpty()) return state
         redoStack.addLast(state)
-        state = undoStack.removeLast()
+        state = restoreMove(undoStack.removeLast())
         return state
     }
 
     fun redo(): GameState {
         if (redoStack.isEmpty()) return state
         undoStack.addLast(state)
-        state = redoStack.removeLast()
+        state = restoreMove(redoStack.removeLast())
         return state
     }
 
     fun canUndo(): Boolean = undoStack.isNotEmpty()
 
     fun canRedo(): Boolean = redoStack.isNotEmpty()
+
+    fun recordCompletion(): Boolean {
+        if (!state.completed || state.completionRecorded) return false
+        state = state.copy(completionRecorded = true)
+        return true
+    }
+
+    private fun restoreMove(move: GameState): GameState = move.copy(
+        elapsedMillis = state.elapsedMillis,
+        settings = state.settings,
+        paused = state.paused,
+        notesMode = state.notesMode,
+        completionRecorded = state.completionRecorded,
+    )
 
     private fun toggleNote(value: Int): GameState {
         val index = state.selected.index

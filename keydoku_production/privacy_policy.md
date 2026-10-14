@@ -12,4 +12,4 @@ Keydoku includes optional donation options. Bitcoin donation information is disp
 
 To delete Keydoku's local data, uninstall the app or clear the app's storage in Android settings.
 
-Contact: replace-this-with-your-support-email@example.com
+Contact: https://github.com/d4mysus/Keydoku/issues. Do not post personal information in public issues.

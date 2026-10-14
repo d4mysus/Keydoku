@@ -10,7 +10,18 @@ Keydoku is a native Android Sudoku app designed for keypad-first dumbphones, esp
 - Pure Kotlin Sudoku engine under `com.keydoku.domain`.
 - Android UI and persistence kept separate from the engine.
 
-## Build
+## Downloads and updates
+
+Signed APKs will be distributed through [GitHub Releases](https://github.com/d4mysus/Keydoku/releases).
+Obtainium can track this repository once the first APK release is published.
+F-Droid submission is planned; there is no confirmed listing yet.
+See [distribution and signing instructions](docs/DISTRIBUTION.md). A physical
+keypad or keyboard is required for entering digits; touch selects cells and menus.
+
+Keydoku is licensed under GPL-3.0-only. Optional donations support development
+and do not unlock features.
+
+## Building from source
 
 This workspace did not have Gradle or an Android SDK installed when the project was scaffolded. Install Android Studio or the command-line SDK first, then build with:
 

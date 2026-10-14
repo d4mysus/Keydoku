@@ -1,5 +1,6 @@
 package com.keydoku
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.AlertDialog
 import android.content.ActivityNotFoundException
@@ -25,6 +26,7 @@ import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.View
+import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
@@ -40,6 +42,7 @@ import com.keydoku.game.GameController
 import com.keydoku.game.GameSettings
 import com.keydoku.game.GameState
 import com.keydoku.game.GameStats
+import com.keydoku.game.GameTimer
 import com.keydoku.ui.SudokuBoardView
 
 class MainActivity : Activity() {
@@ -61,15 +64,14 @@ class MainActivity : Activity() {
     private var toneGenerator: ToneGenerator? = runCatching {
         ToneGenerator(AudioManager.STREAM_MUSIC, 40)
     }.getOrNull()
-    private var runningStartedAt = 0L
-    private var elapsedAtRunStart = 0L
+    private val timer = GameTimer(SystemClock::elapsedRealtime)
     private var completionDialogShown = false
     private val handler = Handler(Looper.getMainLooper())
     private val tick = object : Runnable {
         override fun run() {
             val state = controller.state
             if (currentScreen == Screen.GAME && !state.paused && !state.completed) {
-                controller.updateElapsed(elapsedAtRunStart + SystemClock.elapsedRealtime() - runningStartedAt)
+                captureElapsed()
                 render()
                 repository.saveState(controller.state)
             }
@@ -112,6 +114,7 @@ class MainActivity : Activity() {
     }
 
     override fun onPause() {
+        captureElapsed()
         super.onPause()
         handler.removeCallbacks(tick)
         repository.saveState(controller.state)
@@ -126,6 +129,8 @@ class MainActivity : Activity() {
     }
 
     @Deprecated("Use OnBackPressedDispatcher in new AndroidX activities.")
+    // Legacy devices use this path; API 33+ uses registerBackMenu's platform callback.
+    @SuppressLint("GestureBackNavigation")
     override fun onBackPressed() {
         handleBack()
     }
@@ -141,6 +146,7 @@ class MainActivity : Activity() {
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent): Boolean {
+        captureElapsed()
         if (keyCode in MENU_KEY_CODES) {
             handleBack()
             return true
@@ -189,6 +195,17 @@ class MainActivity : Activity() {
     private fun buildLayout(): View {
         val root = FrameLayout(this).apply {
             setBackgroundColor(Colors.BACKGROUND)
+            setOnApplyWindowInsetsListener { view, insets ->
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    val bars = insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout())
+                    view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+                } else {
+                    @Suppress("DEPRECATION")
+                    view.setPadding(insets.systemWindowInsetLeft, insets.systemWindowInsetTop,
+                        insets.systemWindowInsetRight, insets.systemWindowInsetBottom)
+                }
+                insets
+            }
         }
         gameScreen = buildGameScreen()
         menuScreen = LinearLayout(this).apply {
@@ -200,6 +217,14 @@ class MainActivity : Activity() {
         }
         root.addView(gameScreen)
         root.addView(menuScreen)
+        root.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            val availableWidth = root.width - root.paddingLeft - root.paddingRight - dp(12)
+            val availableHeight = root.height - root.paddingTop - root.paddingBottom - dp(118)
+            val size = minOf(availableWidth, availableHeight).coerceAtLeast(0)
+            if (boardView.layoutParams.height != size) {
+                boardView.layoutParams = boardView.layoutParams.apply { height = size }
+            }
+        }
         return root
     }
 
@@ -230,7 +255,10 @@ class MainActivity : Activity() {
 
         boardView = SudokuBoardView(this).apply {
             id = R.id.sudoku_board
-            onCellSelected = { index -> afterAction(controller.state, controller.select(index)) }
+            onCellSelected = { index ->
+                captureElapsed()
+                afterAction(controller.state, controller.select(index))
+            }
         }
 
         val statusStrip = LinearLayout(this).apply {
@@ -264,6 +292,7 @@ class MainActivity : Activity() {
     }
 
     private fun handleBack() {
+        captureElapsed()
         when (currentScreen) {
             Screen.GAME -> showGameMenu()
             Screen.MAIN_MENU -> showGameScreen()
@@ -683,7 +712,7 @@ class MainActivity : Activity() {
     }
 
     private fun afterAction(before: GameState, after: GameState = controller.state) {
-        if (!before.completed && after.completed) {
+        if (controller.recordCompletion()) {
             stats = stats.completed(after.difficulty, after.elapsedMillis)
         }
         if (before != after) {
@@ -736,8 +765,14 @@ class MainActivity : Activity() {
     }
 
     private fun resetTimerAnchor() {
-        runningStartedAt = SystemClock.elapsedRealtime()
-        elapsedAtRunStart = controller.state.elapsedMillis
+        timer.start(controller.state.elapsedMillis)
+    }
+
+    private fun captureElapsed() {
+        if (::controller.isInitialized && currentScreen == Screen.GAME &&
+            !controller.state.paused && !controller.state.completed) {
+            controller.updateElapsed(timer.elapsedMillis())
+        }
     }
 
     private fun formatTime(millis: Long): String {
@@ -752,11 +787,6 @@ class MainActivity : Activity() {
 
     private fun dp(value: Int): Int =
         (value * resources.displayMetrics.density).toInt()
-
-    private fun statusBarHeight(): Int {
-        val id = resources.getIdentifier("status_bar_height", "dimen", "android")
-        return if (id > 0) resources.getDimensionPixelSize(id) else 0
-    }
 
     private fun preferredBoardSize(): Int {
         val metrics = resources.displayMetrics

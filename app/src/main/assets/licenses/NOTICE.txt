@@ -1,0 +1,15 @@
+Keydoku is licensed under GPL-3.0-only. The license is included in GPL-3.0.txt.
+Corresponding source and build instructions: https://github.com/d4mysus/Keydoku
+For a published release, use its matching Git tag to obtain the exact source.
+
+This app includes:
+
+ZXing core 3.5.3
+Copyright ZXing authors
+https://github.com/zxing/zxing
+License: Apache License 2.0 (included in Apache-2.0.txt)
+
+Kotlin standard library
+Copyright JetBrains s.r.o. and Kotlin Programming Language contributors
+https://github.com/JetBrains/kotlin
+License: Apache License 2.0 (included in Apache-2.0.txt)

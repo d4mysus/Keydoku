@@ -76,7 +76,13 @@ class SudokuBoardView @JvmOverloads constructor(
         if (row in 0..8 && column in 0..8) {
             requestFocus()
             onCellSelected?.invoke(CellIndex(row, column))
+            performClick()
         }
+        return true
+    }
+
+    override fun performClick(): Boolean {
+        super.performClick()
         return true
     }
 

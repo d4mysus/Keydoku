@@ -18,6 +18,7 @@ data class GameState(
     val paused: Boolean = false,
     val completed: Boolean = false,
     val settings: GameSettings = GameSettings(),
+    val completionRecorded: Boolean = false,
 ) {
     val givenIndexes: Set<Int> = puzzle.givens()
     val conflictIndexes: Set<Int> = SudokuValidator.conflictIndexes(current)
