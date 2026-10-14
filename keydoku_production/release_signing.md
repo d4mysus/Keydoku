@@ -1,41 +1,29 @@
-# Release Signing
+# Release signing
 
-For the current GitHub/Obtainium release plan, follow
-[distribution and signing instructions](../docs/DISTRIBUTION.md). The Play
-upload-key instructions below are retained for a possible future Play release.
+Keydoku's release signing is configured in `app/build.gradle.kts` and the
+manual [GitHub release workflow](../.github/workflows/release.yml).
 
-Use Play App Signing in Google Play Console.
+Follow [distribution and signing](../docs/DISTRIBUTION.md) for the key fingerprint,
+GitHub secrets, local environment variables, release tags, and artifact checks.
+Use the permanent release keystore for every update; do not generate a new key
+for each version.
 
-## Recommended Path
+## Local signed APK
 
-1. In Play Console, create the Keydoku app.
-2. Enroll in Play App Signing.
-3. Let Google manage the app signing key.
-4. Create a local upload key for signing uploads.
-
-```sh
-keytool -genkeypair -v \
-  -keystore keydoku-upload.jks \
-  -alias keydoku-upload \
-  -keyalg RSA \
-  -keysize 4096 \
-  -validity 10000
-```
-
-Keep `keydoku-upload.jks` and passwords out of Git.
-
-## Build
-
-Use Android Studio's Generate Signed Bundle flow, or add signing values through local Gradle properties and run:
+Set `KEYDOKU_KEYSTORE` to the keystore's absolute path, and supply
+`KEYDOKU_STORE_PASSWORD`, `KEYDOKU_KEY_ALIAS`, and `KEYDOKU_KEY_PASSWORD`
+through your local environment.
 
 ```sh
-./gradlew --no-daemon --max-workers=1 bundleRelease
+./gradlew test lintRelease assembleRelease
 ```
 
-Upload the signed bundle:
+The signed output is `app/build/outputs/apk/release/app-release.apk`.
+With no signing configuration, Gradle produces `app-release-unsigned.apk`;
+a partial configuration fails instead of silently producing a distributable APK.
 
-```text
-app/build/outputs/bundle/release/app-release.aab
-```
+Never commit secrets or put them in release notes. Back up the permanent key
+and credentials securely.
 
-The checked-in production pack may include an unsigned bundle for build verification. Do not upload an unsigned bundle to Play Console.
+Google Play upload signing is a separate future workflow and is not required
+for GitHub or Obtainium.

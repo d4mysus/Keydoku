@@ -1,61 +1,92 @@
 # Keydoku
 
-Keydoku is a native Android Sudoku app designed for keypad-first dumbphones, especially the Dumber Mini. The Dumber Mini product page describes an AOSP 14 / LineageOS 21 based phone with a 2.8 inch 640x480 capacitive touchscreen and 21 physical keys, so the app is built around both touch and hardware key input.
+**Offline Sudoku for Android keypad phones.**
 
-## Project Shape
+Keydoku is a small, native Sudoku game designed for phones such as the Dumber Mini.
+Play with a physical keypad or keyboard, with optional touch selection.
+No ads, accounts, analytics, or network permission.
 
-- Kotlin + Android Views, no Compose.
-- Single `:app` module.
-- Offline only: no network permission, no ads, no accounts.
-- Pure Kotlin Sudoku engine under `com.keydoku.domain`.
-- Android UI and persistence kept separate from the engine.
+<p>
+  <a href="https://github.com/d4mysus/Keydoku/releases">Download APK</a> ·
+  <a href="docs/INPUT_MODEL.md">Controls</a> ·
+  <a href="keydoku_production/privacy_policy.md">Privacy</a> ·
+  <a href="https://github.com/d4mysus/Keydoku/issues">Report an issue</a>
+</p>
 
-## Downloads and updates
+<img src="keydoku_production/assets/screenshots/keydoku-board.png" alt="Keydoku's Sudoku board with keypad controls and game status" width="280">
 
-Signed APKs will be distributed through [GitHub Releases](https://github.com/d4mysus/Keydoku/releases).
-Obtainium can track this repository once the first APK release is published.
-F-Droid submission is planned; there is no confirmed listing yet.
-See [distribution and signing instructions](docs/DISTRIBUTION.md). A physical
-keypad or keyboard is required for entering digits; touch selects cells and menus.
+## Features
 
-Keydoku is licensed under GPL-3.0-only. Optional donations support development
-and do not unlock features.
+- Puzzles with a unique solution in four difficulty levels: Easy, Medium, Hard, and Expert.
+- Notes, hints, undo, and redo.
+- A timer, per-difficulty statistics, and saved progress.
+- Optional mistake checking, cell highlights, sound, and haptic feedback.
+- Compact menus and shortcuts designed for small screens.
 
-## Building from source
+## Install and update
 
-This workspace did not have Gradle or an Android SDK installed when the project was scaffolded. Install Android Studio or the command-line SDK first, then build with:
+Requires **Android 6.0 or newer** and a **physical keypad or keyboard**.
+Touch selects cells and menu items; there is no on-screen number pad.
 
-```sh
-./gradlew test
-./gradlew assembleDebug
-```
+Download the signed APK attached to a [GitHub release](https://github.com/d4mysus/Keydoku/releases)
+and open it on your phone. Allow installation from your chosen browser or file manager
+if Android prompts you. Current-format releases include `keydoku.apk` and `SHA256SUMS`.
 
-If you do not have a Gradle wrapper yet, open the project in Android Studio and let it sync, or install Gradle 9.4.1 and run:
-
-```sh
-gradle wrapper --gradle-version 9.4.1
-./gradlew assembleDebug
-```
-
-The debug APK will be at:
+For updates through [Obtainium](https://github.com/ImranR98/Obtainium), add:
 
 ```text
-app/build/outputs/apk/debug/app-debug.apk
+https://github.com/d4mysus/Keydoku
 ```
 
-Install on a connected Android device:
+F-Droid submission is planned; Keydoku does not have a confirmed F-Droid listing.
+GitHub is the current distribution channel.
+
+## Quick controls
+
+| Key | Action |
+| --- | --- |
+| D-pad | Move between cells |
+| `1`–`9` | Enter a digit or toggle a note |
+| `0` / Delete | Clear the selected cell |
+| `*` | Toggle notes mode |
+| `#` | Fill a hint |
+| Volume − / Volume + | Undo / redo |
+| Back / Menu | Open the game menu or return to the previous screen |
+
+See the [complete controls guide](docs/INPUT_MODEL.md) for menu shortcuts.
+
+## Privacy and support
+
+Puzzles, notes, settings, and statistics stay on your device. The app disables
+cloud backup and device-to-device transfer. Clearing app storage or uninstalling
+removes saved progress. See the [privacy policy](keydoku_production/privacy_policy.md).
+
+Keydoku is free. Optional [Buy Me a Coffee donations](https://buymeacoffee.com/d4mysus)
+and the in-app Bitcoin option support development and do not unlock features.
+
+For bugs or suggestions, [open an issue](https://github.com/d4mysus/Keydoku/issues).
+Include your phone model, Android version, app version, and steps to reproduce.
+
+## Build from source
+
+Use JDK 21, Android SDK platform 37.0, and Build Tools 36.0.0.
+The included wrapper provides Gradle 9.4.1; a separate Gradle installation is unnecessary.
 
 ```sh
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+./gradlew test lintRelease assembleDebug
 ```
 
-## Documentation
+The debug APK is at `app/build/outputs/apk/debug/app-debug.apk`.
+Use a debug build for development; distribution APKs use the permanent release key.
 
+- [Development and device testing](docs/DEVELOPMENT.md)
+- [Signed releases and Obtainium](docs/DISTRIBUTION.md)
 - [Architecture](docs/ARCHITECTURE.md)
-- [Input model](docs/INPUT_MODEL.md)
 - [Sudoku engine](docs/SUDOKU_ENGINE.md)
-- [Development guide](docs/DEVELOPMENT.md)
+- [Changelog](CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md)
 
-## Device Target
+## License
 
-The first target is the Dumber Mini. Keep all UI changes usable on a 640x480 screen and fully playable without touch.
+Keydoku is licensed under [GPL-3.0-only](LICENSE).
+The APK includes the GPL and notices for its Apache-2.0 dependencies.

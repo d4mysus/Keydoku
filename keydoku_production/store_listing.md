@@ -1,37 +1,39 @@
-# Google Play Store Listing Draft
+# Keydoku listing copy
 
-## Short Description
+## Short description
 
-Offline Sudoku built for keypad phones.
+Offline Sudoku for Android keypad phones.
 
-## Full Description
+## Full description
 
-Keydoku is a calm, offline Sudoku game designed for small Android keypad phones like the Dumber Mini.
+Keydoku is a free, offline Sudoku game designed for small Android keypad phones,
+including the Dumber Mini.
 
-Play with physical keys, touch, or both. Move around the board with the D-pad, enter digits with the number keys, toggle notes with `*`, and request a hint with `#`.
+Move around the board with the D-pad, enter digits with the number keys,
+toggle notes with `*`, and request a hint with `#`. Touch selects cells and
+menu items. A physical keypad or keyboard is required for entering digits.
 
 Features:
 
-- Offline Sudoku with no ads and no accounts
-- Keypad-first controls
-- Touch cell selection
-- Easy, Medium, Hard, and Expert puzzles
-- Notes mode
-- Hints
-- Undo and redo
-- Timer and local stats
-- Compact layout for small screens
+- Puzzles with a unique solution across four difficulty levels
+- Notes, hints, undo, and redo
+- Timer, local statistics, and saved progress
+- Optional mistake checking and cell highlights
+- Optional sound and haptic feedback
+- Compact layout and menu shortcuts for small screens
 
-Keydoku is free. Optional donations support development but do not unlock any features.
+No ads, accounts, analytics, or network permission. Game progress and settings
+stay on your device.
 
-## Suggested Category
+Keydoku is free and open source under GPL-3.0-only. Optional Bitcoin and
+Buy Me a Coffee donations support development and do not unlock features.
 
-Game / Puzzle
+## Links
 
-## Tags
+- Downloads: https://github.com/d4mysus/Keydoku/releases
+- Source and Obtainium URL: https://github.com/d4mysus/Keydoku
+- Support: https://github.com/d4mysus/Keydoku/issues
+- Privacy: [privacy_policy.md](privacy_policy.md)
 
-Sudoku, puzzle, offline, keypad, dumbphone
-
-## Support
-
-Replace with your support email or website before submitting.
+F-Droid submission is planned, but there is no confirmed listing.
+Google Play distribution is deferred.

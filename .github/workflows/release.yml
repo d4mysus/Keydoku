@@ -64,5 +64,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag }}
         run: |
-          gh release create "$RELEASE_TAG" dist/keydoku.apk dist/SHA256SUMS \
-            --verify-tag --draft --title "Keydoku $RELEASE_TAG" --generate-notes
+          set -euo pipefail
+          notes_file="docs/releases/${RELEASE_TAG#v}.md"
+          if [ -f "$notes_file" ]; then
+            gh release create "$RELEASE_TAG" dist/keydoku.apk dist/SHA256SUMS \
+              --verify-tag --draft --title "Keydoku ${RELEASE_TAG#v}" --notes-file "$notes_file"
+          else
+            gh release create "$RELEASE_TAG" dist/keydoku.apk dist/SHA256SUMS \
+              --verify-tag --draft --title "Keydoku ${RELEASE_TAG#v}" --generate-notes
+          fi

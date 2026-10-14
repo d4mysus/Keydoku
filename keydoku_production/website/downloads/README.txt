@@ -1,5 +1,4 @@
-Put the signed direct-download APK here as:
+APKs are hosted on GitHub Releases:
+https://github.com/d4mysus/Keydoku/releases
 
-keydoku.apk
-
-The website button already points to downloads/keydoku.apk.
+The website links to the release page. No local APK is required in this directory.

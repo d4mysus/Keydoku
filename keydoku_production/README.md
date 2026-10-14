@@ -1,33 +1,34 @@
-# Keydoku Production Pack
+# Release and website assets
 
-The current distribution plan is signed APKs on GitHub Releases, with updates
-through Obtainium and a possible F-Droid submission. See
-[distribution instructions](../docs/DISTRIBUTION.md).
+This directory contains Keydoku's public website, privacy policy, listing copy,
+and visual assets. Signed APKs are distributed through GitHub Releases, with
+Obtainium support and a planned F-Droid submission.
 
-This folder contains website assets, privacy policies, and archived Google
-Play preparation materials. Google Play publication is deferred.
+## Contents
 
-Store assets:
+| Path | Purpose |
+| --- | --- |
+| [website/](website/README.md) | Standalone static website |
+| [privacy_policy.md](privacy_policy.md) | App privacy policy |
+| [privacy/index.html](privacy/index.html) | Standalone privacy page for separate hosting |
+| [store_listing.md](store_listing.md) | Public listing copy |
+| [data_safety.md](data_safety.md) | Data-handling reference |
+| [policy_audit.md](policy_audit.md) | Distribution and privacy review scope |
+| [release_signing.md](release_signing.md) | Signing guide |
+| `assets/screenshots/` | Gameplay, menu, and donation screenshots |
+| `assets/play-store-icon-512.png` | 512-pixel app icon |
+| `assets/feature-graphic-1024x500.jpg` | Feature graphic |
 
-- App icon: `assets/play-store-icon-512.png`
-- Feature graphic: `assets/feature-graphic-1024x500.jpg`
-- Screenshots: `assets/screenshots/`
-- Privacy policy page: `privacy/index.html`
-- Static website for Cloudflare Pages: `website/`
+The icon's filename is retained for compatibility; it is also usable outside
+Google Play. No Google Play listing is currently planned.
+[PLAY_STORE_CHECKLIST.md](PLAY_STORE_CHECKLIST.md) records deferred requirements
+only.
 
-Build the APK from the project root after configuring signing as documented:
+## Release workflow
 
-```sh
-./gradlew --no-daemon --max-workers=2 test lintRelease assembleRelease
-```
+Follow [distribution and signing](../docs/DISTRIBUTION.md).
+Public releases contain `keydoku.apk` and `SHA256SUMS`; APKs are not stored in Git
+or copied into the website.
 
-The signed APK is at:
-
-```text
-app/build/outputs/apk/release/app-release.apk
-```
-
-Without signing configuration, Gradle produces `app-release-unsigned.apk`,
-which cannot be installed or distributed.
-
-Do not commit release keystores or passwords.
+Use gameplay and menu screenshots for the main listing. Donation screenshots
+document optional support options; donations never unlock features.

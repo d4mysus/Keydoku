@@ -3,40 +3,101 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Keydoku - Offline Sudoku for Keypad Phones</title>
-  <meta name="description" content="Keydoku is a free offline Sudoku game designed for small Android keypad phones.">
+  <meta name="description" content="Keydoku is free, offline Sudoku for Android keypad phones. Physical controls, saved progress, no ads, and no accounts.">
+  <meta property="og:title" content="Keydoku · Offline Sudoku for keypad phones">
+  <meta property="og:description" content="A small Sudoku game for physical keys. Free, open source, and offline.">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#fbfaf7">
+  <title>Keydoku · Offline Sudoku for keypad phones</title>
+  <link rel="icon" href="assets/keydoku-icon.png" type="image/png">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="page">
-    <section class="hero">
-      <img class="icon" src="assets/keydoku-icon.png" alt="Keydoku app icon" width="96" height="96">
-      <div>
-        <h1>Keydoku</h1>
-        <p class="tagline">Offline Sudoku for keypad phones.</p>
-      </div>
-    </section>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="page">
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Keydoku home">
+        <img src="assets/keydoku-icon.png" alt="" width="48" height="48">
+        <span>Keydoku</span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="#controls">Controls</a>
+        <a href="https://github.com/d4mysus/Keydoku">Source</a>
+      </nav>
+    </header>
 
-    <div class="actions" aria-label="Download links">
-      <a class="button primary" href="https://github.com/d4mysus/Keydoku/releases">GitHub Releases</a>
-      <a class="button" href="https://github.com/d4mysus/Keydoku/releases/latest/download/keydoku.apk">Download latest APK</a>
-    </div>
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Free · Open source · Offline</p>
+          <h1 id="hero-title">Sudoku,<br>one key at a time.</h1>
+          <p class="intro">A small Android game built for keypad phones. Take your time, make a note, and find the next number.</p>
+          <div class="actions">
+            <a class="button primary" href="https://github.com/d4mysus/Keydoku/releases">Download on GitHub</a>
+            <a class="text-link" href="#updates">Update with Obtainium</a>
+          </div>
+          <p class="requirements">Android 6.0+ · Physical keypad or keyboard required</p>
+        </div>
+        <figure class="game-preview">
+          <img class="screenshot" src="assets/keydoku-board.png" alt="Keydoku's Sudoku board showing selected cells, elapsed time, and keypad shortcuts" width="480" height="640">
+          <figcaption>The board, your notes, and nothing in the way.</figcaption>
+        </figure>
+      </section>
 
-    <img class="screenshot" src="assets/keydoku-board.png" alt="Keydoku Sudoku board on a small phone screen">
+      <section class="features" aria-label="Game features">
+        <div>
+          <h2>A puzzle at your pace</h2>
+          <p>Four difficulty levels, unique solutions, notes, and hints. Undo a move or redo it without losing your time.</p>
+        </div>
+        <div>
+          <h2>Pick up where you left off</h2>
+          <p>Your puzzle, settings, and statistics stay on your device. No account, cloud sync, or Internet connection needed.</p>
+        </div>
+        <div>
+          <h2>Made for physical keys</h2>
+          <p>Navigate with the D-pad and enter digits with the keypad. Touch can select cells and menu items; there is no on-screen number pad.</p>
+        </div>
+      </section>
 
-    <section class="copy">
-      <h2>Small-screen first</h2>
-      <p>Move with the D-pad, enter digits with the keypad, toggle notes with *, and use # for hints. Touch works too.</p>
+      <section class="controls-section" id="controls" aria-labelledby="controls-title">
+        <div class="section-heading">
+          <p class="eyebrow">Learn the keys</p>
+          <h2 id="controls-title">Keep your hands on the keypad.</h2>
+        </div>
+        <dl class="controls">
+          <div><dt><kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd></dt><dd>Move between cells</dd></div>
+          <div><dt><kbd>1</kbd>–<kbd>9</kbd></dt><dd>Enter a digit or toggle a note</dd></div>
+          <div><dt><kbd>0</kbd> / <kbd>Delete</kbd></dt><dd>Clear a cell</dd></div>
+          <div><dt><kbd>*</kbd></dt><dd>Toggle notes mode</dd></div>
+          <div><dt><kbd>#</kbd></dt><dd>Fill a hint</dd></div>
+          <div><dt><kbd>Vol −</kbd> / <kbd>Vol +</kbd></dt><dd>Undo / redo</dd></div>
+          <div><dt><kbd>Back</kbd> / <kbd>Menu</kbd></dt><dd>Open the menu or return</dd></div>
+        </dl>
+      </section>
 
-      <h2>Free and quiet</h2>
-      <p>No ads. No accounts. No network permission. Game progress and stats stay on your device.</p>
-    </section>
-
-    <p>APK downloads become available after the first public release. Obtainium can follow the GitHub repository for updates.</p>
+      <section class="details" id="updates">
+        <div>
+          <h2>Simple downloads. Simple updates.</h2>
+          <p>Get a signed APK from <a href="https://github.com/d4mysus/Keydoku/releases">GitHub Releases</a>. For automatic update tracking, add this repository in <a href="https://github.com/ImranR98/Obtainium">Obtainium</a>:</p>
+          <p class="source-url"><a href="https://github.com/d4mysus/Keydoku">github.com/d4mysus/Keydoku</a></p>
+          <p class="muted">F-Droid submission is planned. There is no confirmed listing yet.</p>
+        </div>
+        <div>
+          <h2>Free, with optional support.</h2>
+          <p>No ads, analytics, accounts, or network permission. Donations through <a href="https://buymeacoffee.com/d4mysus">Buy Me a Coffee</a> or the in-app Bitcoin option support development. Every feature stays free.</p>
+          <p>Found something to improve? <a href="https://github.com/d4mysus/Keydoku/issues">Open an issue</a>.</p>
+        </div>
+      </section>
+    </main>
 
     <footer>
-      <a href="privacy.html">Privacy Policy</a>
+      <span>Keydoku · GPL-3.0-only</span>
+      <nav aria-label="Footer navigation">
+        <a href="privacy.html">Privacy</a>
+        <a href="https://github.com/d4mysus/Keydoku/blob/main/LICENSE">License</a>
+        <a href="https://github.com/d4mysus/Keydoku">GitHub</a>
+      </nav>
     </footer>
-  </main>
+  </div>
 </body>
 </html>

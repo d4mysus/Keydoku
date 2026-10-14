@@ -1,78 +1,115 @@
-# GitHub, Obtainium, and F-Droid
+# Distribution and signing
 
-## GitHub releases
+Keydoku ships signed APKs through GitHub Releases. Obtainium follows those releases.
+F-Droid submission is planned; Google Play distribution is deferred.
 
-Distribute a signed release APK, not a debug APK or an Android App Bundle.
-Keep the same signing key for every GitHub release: Android will reject an
-update signed by a different key. Back up the key and its passwords securely.
-Increment `versionCode` and `versionName` in `app/build.gradle.kts` for every
-update; make a matching Git tag such as `v0.1.0`.
+## Release artifacts
 
-The manual GitHub Actions workflow `GitHub APK release` builds an existing tag,
-runs unit tests and release lint, verifies the APK signature, and creates a
-**draft** GitHub release with `keydoku.apk` and `SHA256SUMS` attached.
-Review the draft and test its APK on the target phone before publishing it.
-The workflow has not been executed on GitHub yet.
+Each current-format public release contains:
 
-The APK bundles GPLv3 and third-party license notices in `assets/licenses/`.
-Keep published source tags available so recipients can obtain the source
-corresponding to each APK.
+- `keydoku.apk`: the universal signed APK.
+- `SHA256SUMS`: the APK's SHA-256 checksum.
+- GitHub's source archives for the corresponding version tag.
 
-Configure these repository Actions secrets:
+Tags use `v<versionName>`, such as `v0.1.1`. Each update must also increment
+`versionCode` in `app/build.gradle.kts` so Android recognizes it as newer.
 
-- `KEYDOKU_KEYSTORE_BASE64`: the base64-encoded private release keystore.
-- `KEYDOKU_STORE_PASSWORD`: its store password.
-- `KEYDOKU_KEY_ALIAS`: the signing key alias.
-- `KEYDOKU_KEY_PASSWORD`: its key password.
+The `prod` tag is the older 0.1.0 release and uses `com.keydoku.apk`.
+Version 0.1.1 establishes the permanent signing key for future GitHub releases.
 
-Create your permanent release key locally with `keytool -genkeypair` using an
-RSA key, then enter the values through GitHub's secret settings. Never commit
-the keystore, passwords, or an encoded copy of the keystore.
+## Signing key
 
-For a local signed build, set `KEYDOKU_KEYSTORE` to the keystore's absolute
-path, plus the three password/alias variables listed above, then run:
+Use the same key for every release. Keep an encrypted backup of the keystore,
+its alias, and both passwords. Losing the key prevents normal updates for
+existing installations.
 
-```sh
-./gradlew --no-daemon test lintRelease assembleRelease
+The release certificate's SHA-256 fingerprint is:
+
+```text
+b4c1a225da706f8a6ff6094f25dd030bffe5c8afcfb1a41c049ba19b285efd88
 ```
 
-Without signing variables, Gradle intentionally produces an unsigned release
-APK, useful for independent source builds. Do not distribute that APK.
+The older `prod` APK uses a different key. An old test installation must be
+removed once before installing a current-key APK; that clears its local data.
+
+Configure these GitHub repository Actions secrets:
+
+| Secret | Purpose |
+| --- | --- |
+| `KEYDOKU_KEYSTORE_BASE64` | Base64-encoded release keystore |
+| `KEYDOKU_STORE_PASSWORD` | Keystore password |
+| `KEYDOKU_KEY_ALIAS` | Signing-key alias |
+| `KEYDOKU_KEY_PASSWORD` | Signing-key password |
+
+These are already configured for the verified 0.1.1 workflow. Preserve them
+when preparing later releases. Never commit the keystore, encoded keystore,
+or passwords.
+
+For local signing, use `KEYDOKU_KEYSTORE` for the absolute keystore path,
+plus the three password/alias variables above. Gradle signs only when all
+four values are present and rejects a partial configuration.
+
+## Release procedure
+
+1. Merge the intended changes, increment the version, update [CHANGELOG.md](../CHANGELOG.md),
+   and write user-facing notes in `docs/releases/<versionName>.md`.
+2. Run unit tests, release lint, and device acceptance checks from the [development guide](DEVELOPMENT.md).
+3. Create an annotated tag for the release commit and push that tag.
+4. Open [GitHub Actions](https://github.com/d4mysus/Keydoku/actions/workflows/release.yml),
+   select **GitHub APK release**, and run it with the matching tag.
+5. Review the generated draft, verify its checksum and signing certificate,
+   and test the attached APK on the target phone.
+6. Review the release notes and publish the draft as the latest stable release.
+
+The workflow uses Ubuntu 24.04's preinstalled Android SDK, runs tests and lint,
+builds with the signing secrets, verifies the APK, checks the version against
+the tag, and creates a draft with both release assets. It has been exercised
+successfully for version 0.1.1.
+It uses the version's maintained release-notes file when present and falls back
+to GitHub-generated notes otherwise.
+
+The workflow currently expects a new release tag. If a draft for that tag
+already exists, do not blindly rerun the complete publication step or overwrite
+a public release. Review and handle the existing draft before retrying.
+
+To verify a downloaded release locally:
+
+```sh
+sha256sum -c SHA256SUMS
+apksigner verify --verbose --print-certs keydoku.apk
+```
+
+Keep source tags available. GPLv3 and third-party notices are bundled in
+`assets/licenses/` inside the APK.
 
 ## Obtainium
 
-Obtainium can follow the public GitHub repository:
+Add this source URL in Obtainium:
 
 ```text
 https://github.com/d4mysus/Keydoku
 ```
 
-Add that URL in Obtainium once a release containing `keydoku.apk` is published.
-GitHub release tags provide update versions, and the APK's `versionCode`
-provides Android's update ordering. Keep one universal APK per release and
-the same signing certificate. Draft releases are not public update sources.
+Each public stable release contains one APK. GitHub tags identify releases;
+the APK's version code controls Android update ordering. Drafts are not public
+update sources. Keep the same signing certificate so updates preserve data.
 
 ## F-Droid
 
-Keydoku is licensed GPL-3.0-only, has no proprietary runtime SDK, and can be
-built from source. This makes a submission plausible, not an accepted listing.
-The Apache-2.0 ZXing dependency is compatible with GPLv3.
+The GPL-3.0-only license and open-source runtime dependencies make submission
+plausible. F-Droid listing text is in `fastlane/metadata/android/en-US/`, with
+screenshots in `keydoku_production/assets/screenshots/`.
 
-After a tested release, request packaging through F-Droid's official
-submission process. Provide the source repository, release tag, license,
-description, screenshots, and reproducible build instructions. F-Droid must
-review dependencies, tooling availability, and its current donation policy.
-The pinned AGP 9.2.0 / Gradle 9.4.1 / SDK 37 toolchain must be supported by its
-builders; support has not been verified here.
+A listing still requires F-Droid review and a tested build recipe. Its builders
+must support the pinned AGP, Gradle, and SDK versions. Acceptance, toolchain
+support, and donation-policy review are not yet confirmed.
 
-Listing text is prepared in `fastlane/metadata/android/en-US/`. Screenshots
-are available in `keydoku_production/assets/screenshots/`. No F-Droid build
-recipe or listing is claimed to be accepted or tested yet.
+F-Droid normally builds and signs packages itself. Its APK may use a different
+certificate from the GitHub APK, so users cannot assume they can switch channels
+without uninstalling. Keep a single update channel unless compatible signing
+has been established.
 
-F-Droid normally builds and signs apps itself. Its APK may use a different
-certificate from the GitHub APK; users should not expect to switch channels
-without uninstalling, which deletes this app's local progress. Use one update
-channel unless reproducible-build signing arrangements are established.
+## Website
 
-Google Play enrollment, App Bundles, and Play Billing are not required for
-this distribution plan. Optional donations do not unlock game features.
+The static website is in `keydoku_production/website/`.
+See its [hosting instructions](../keydoku_production/website/README.md).

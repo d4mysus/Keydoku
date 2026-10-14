@@ -1,36 +1,33 @@
-# Policy Audit
+# Privacy and distribution review
 
-Date: August 5, 2026
+Reviewed against the current repository on 14 October 2026.
 
-## Pass
+## Verified in source
 
-- No dangerous permissions.
-- No network permission.
-- No ads.
-- No account creation.
-- No user-generated content.
-- No location, contacts, camera, microphone, files, or health data.
-- Local game progress only.
-- Target SDK `37`, which is above the current Google Play target API requirement.
-- Android backup disabled.
+- No permissions are declared, including no Internet permission.
+- No ads, analytics, accounts, or user-generated content.
+- Puzzle progress, notes, settings, timer, and statistics are stored locally.
+- Cloud backups and device-to-device transfer are explicitly disabled.
+- ZXing core generates donation QR codes locally.
+- Bitcoin support displays an address and QR code.
+- Buy Me a Coffee opens an external browser only when requested.
+- Donations do not unlock features, content, or hints.
 
-## Watch
+## Current distribution
 
-- Donations must remain optional creator support only.
-- Donations must not unlock digital content or services.
-- If Keydoku later adds paid features, subscriptions, extra hints, ad removal, badges, or premium puzzles, use Google Play Billing or remove external payment links.
-- Privacy policy contact email must be replaced before submission.
+Signed APKs are prepared through GitHub Releases; Obtainium can follow public
+releases. The signed 0.1.1 pipeline has passed tests, lint, signing, and artifact
+verification. Physical-device acceptance testing is a separate release check.
 
-## Sources Checked
+The project is licensed GPL-3.0-only and includes notices for its Apache-2.0
+dependencies.
 
-- Google Play Payments policy.
-- Google Play Data safety requirements.
-- Google Play User Data / Privacy policy requirements.
-- Google Play target API level requirements.
+## Review boundaries
 
-Official references:
+This source review is not approval from an app store. F-Droid acceptance,
+builder compatibility, and donation-policy review remain pending.
+Google Play is deferred, and its current policy requirements have not been
+certified here.
 
-- https://support.google.com/googleplay/android-developer/answer/9858738
-- https://support.google.com/googleplay/android-developer/answer/10144311
-- https://support.google.com/googleplay/android-developer/answer/11926878
-- https://developer.android.com/studio/publish/app-signing
+Revisit the privacy policy and this review before adding network access,
+telemetry, accounts, paid features, or another third-party SDK.

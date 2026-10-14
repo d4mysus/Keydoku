@@ -29,7 +29,7 @@ Important APIs:
 1. Creates a fully solved board by solving an empty board with randomized candidate order.
 2. Shuffles all cell indexes.
 3. Removes clues while the puzzle still has exactly one solution.
-4. Stops when it reaches the difficulty target.
+4. Stops when it reaches the difficulty target or exhausts the candidate removals.
 
 Difficulty currently uses clue targets:
 
@@ -38,4 +38,6 @@ Difficulty currently uses clue targets:
 - Hard: 28 givens
 - Expert: 24 givens
 
-To improve difficulty scoring later, add a human-solving rating step after uniqueness validation.
+Targets are not guarantees: a puzzle may retain more clues to preserve a unique
+solution. Difficulty currently reflects clue targets, not a human-solving rating.
+To improve scoring later, add a human-solving rating step after uniqueness validation.
