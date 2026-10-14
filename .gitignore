@@ -14,3 +14,20 @@ keydoku_production/release/
 *.jks
 *.keystore
 *.iml
+
+# Local credentials and signing material
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.pem
+*.key
+*.jks.b64
+*.keystore.b64
+*.jks.base64
+*.keystore.base64
+
+# Runtime diagnostics can include local data
+*.log
+*.hprof

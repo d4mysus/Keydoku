@@ -1,9 +1,0 @@
-<inset xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetBottom="12dp"
-    android:insetLeft="12dp"
-    android:insetRight="12dp"
-    android:insetTop="12dp">
-    <bitmap
-        android:gravity="center"
-        android:src="@drawable/ic_launcher_foreground_image" />
-</inset>
