@@ -1,0 +1,1 @@
+New launcher artwork, adaptive icons for Android 8+, and monochrome themed icons on supported Android 13+ launchers. Updates from 0.1.1 preserve your progress and settings.

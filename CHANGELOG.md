@@ -1,9 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.1.2
 
 - Updated launcher and website artwork from the supplied SVG icon pack.
 - Adaptive icons for Android 8+ and monochrome themed icons for Android 13+.
+
+Updates from 0.1.1 use the same signing key and preserve local progress.
+Version code: 3.
 
 ## 0.1.1
 
