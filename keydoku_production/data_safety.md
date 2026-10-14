@@ -1,18 +1,24 @@
-# Google Play Data Safety Answers
+# Data handling
 
-Use these answers for the current Keydoku build.
+This reference describes the app's current behavior. It is not a completed
+Google Play Data safety submission.
 
-- Does the app collect or share user data? No.
-- Is all collected user data encrypted in transit? Not applicable.
-- Can users request that data be deleted? Not applicable; no data is collected by the developer.
-- Data types collected: none.
-- Data shared with third parties: none.
-- App permissions: none declared.
-- Third-party SDKs/libraries: ZXing core for local QR generation only; it does not transmit data.
+| Category | Behavior |
+| --- | --- |
+| Personal data collected or shared | None by the app |
+| Accounts, ads, and analytics | None |
+| App permissions | None declared |
+| Saved data | Puzzle, notes, timer, settings, and statistics stored locally |
+| Cloud backup and device transfer | Disabled |
+| QR generation | Local ZXing core library; no data transmission |
+| Donations | Optional address display or external browser link |
 
-Notes:
+Opening Buy Me a Coffee transfers control to the user's browser.
+That service handles information supplied on its website under its own policy.
+Bitcoin donation information is displayed locally; Keydoku does not initiate
+a payment or transmit wallet data.
 
-- Puzzles, notes, timer, settings, and stats are stored locally on the device.
-- Android backup is disabled in the manifest.
-- Buy Me a Coffee opens in the user's browser; any data entered there is handled by Buy Me a Coffee, not Keydoku.
-- Bitcoin donation is a QR/address display only and does not transmit data from the app.
+Users can delete local game data by clearing app storage or uninstalling.
+The app does not synchronize or restore data after deletion.
+
+See the [privacy policy](privacy_policy.md).

@@ -1,23 +1,30 @@
-# Keydoku Website
+# Keydoku website
 
-Static website for Cloudflare Pages.
+A standalone static site with no build step, tracking scripts, or external
+font dependencies.
 
-Publish this folder:
+## Hosting
 
-```text
-keydoku_production/website
+Publish `keydoku_production/website` as the site root on Cloudflare Pages,
+GitHub Pages, or another static host. No APK needs to be copied into the site.
+
+- Home page: `index.html`
+- Privacy policy: `privacy.html`
+- Shared styles: `styles.css`
+- Images and favicon: `assets/`
+
+The download link opens GitHub Releases so it works across release filenames
+and does not point to an unpublished draft asset. Obtainium uses the repository
+URL rather than this website.
+
+## Local preview
+
+From the repository root:
+
+```sh
+python3 -m http.server 8000 --directory keydoku_production/website
 ```
 
-The privacy policy is available at `/privacy.html` after hosting this folder.
-The example URL is:
-
-```text
-https://your-domain.example/privacy.html
-```
-
-The download buttons point to GitHub Releases and the latest release asset
-`keydoku.apk`. No APK needs to be copied into this website. The latest-download
-URL will work once the first public signed APK release exists.
-
-Obtainium can track `https://github.com/d4mysus/Keydoku`. There is no confirmed
-F-Droid listing yet.
+Check the home page and privacy page at narrow and wide viewport sizes.
+Preserve the physical-keypad requirement and keep the public privacy copy
+consistent with `../privacy_policy.md`.

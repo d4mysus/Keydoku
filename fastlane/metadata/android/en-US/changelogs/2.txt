@@ -1,0 +1,1 @@
+Undo/redo now preserves elapsed time and settings. Completed puzzles are counted only once, and hints cannot modify paused games. Timer updates retain time between actions. Improved system-bar handling, touch-click accessibility, and backup controls. Signed GitHub releases include checksums and open-source license notices.

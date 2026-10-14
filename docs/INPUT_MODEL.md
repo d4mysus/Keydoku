@@ -1,6 +1,8 @@
 # Input Model
 
-Keydoku must be playable with touch or physical keys. Touch only selects cells; all game actions are available through physical keys.
+Keydoku requires a physical keypad or keyboard for digit entry. Touch selects
+cells and menu items; there is no on-screen number pad. Every essential action
+is reachable through physical keys.
 
 ## Physical Keys
 
@@ -21,6 +23,8 @@ The mapping lives in `MainActivity.onKeyUp`. Android's hardware-key guidance rec
 ## Menu and Difficulty
 
 Open the full-screen game menu with Back, menu, soft-left, or soft-right.
+Time spent in menus or while the app is in the background is excluded from the
+timer. Back returns through submenus; it does not toggle a dedicated pause mode.
 
 Menu shortcuts:
 

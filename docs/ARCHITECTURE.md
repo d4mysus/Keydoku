@@ -18,9 +18,10 @@ Pure Kotlin Sudoku logic. It has no Android imports and can be unit tested quick
 
 Game session rules.
 
-- `GameState`: current puzzle, notes, selection, settings, timer value, completion state.
+- `GameState`: current puzzle, notes, selection, settings, timer value, and persisted completion history.
 - `GameController`: actions such as digit entry, notes, hints, undo, redo, pause, and selection.
 - `GameStats`: per-difficulty started/completed counts and time stats.
+- `GameTimer`: monotonic elapsed-time tracking between ticks and user actions.
 
 `data`
 
@@ -38,6 +39,11 @@ Android Views.
 `MainActivity` receives a touch/key/button event, calls `GameController`, then renders the new `GameState` into `SudokuBoardView` and saves it through `GameRepository`.
 
 The board view does not mutate game rules. It only draws state and reports selected cells.
+
+Undo/redo restores move state while preserving current elapsed time, settings,
+and completion history. `recordCompletion()` marks a puzzle once before the
+activity updates its statistics. The marker survives persistence and undo/redo;
+legacy completed saves default to already recorded.
 
 ## Extension Rule
 
