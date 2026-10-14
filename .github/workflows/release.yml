@@ -24,10 +24,11 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Install SDK
+      - name: Verify hosted SDK
         run: |
-          sdkmanager --version
-          sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
+          set -euo pipefail
+          test -f "$ANDROID_HOME/platforms/android-37.0/android.jar" || { echo '::error::The hosted runner is missing Android platform 37.0'; exit 1; }
+          test -x "$ANDROID_HOME/build-tools/36.0.0/apksigner" || { echo '::error::The hosted runner is missing Android Build Tools 36.0.0'; exit 1; }
       - name: Test and lint
         run: ./gradlew --no-daemon --max-workers=2 test lintRelease
       - name: Build signed APK
