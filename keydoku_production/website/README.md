@@ -8,20 +8,16 @@ Publish this folder:
 keydoku_production/website
 ```
 
-Use this privacy policy URL in Play Console after publishing:
+The privacy policy is available at `/privacy.html` after hosting this folder.
+The example URL is:
 
 ```text
 https://your-domain.example/privacy.html
 ```
 
-For direct APK downloads, put your signed APK here:
+The download buttons point to GitHub Releases and the latest release asset
+`keydoku.apk`. No APK needs to be copied into this website. The latest-download
+URL will work once the first public signed APK release exists.
 
-```text
-downloads/keydoku.apk
-```
-
-The Play Store button points to:
-
-```text
-https://play.google.com/store/apps/details?id=com.keydoku
-```
+Obtainium can track `https://github.com/d4mysus/Keydoku`. There is no confirmed
+F-Droid listing yet.

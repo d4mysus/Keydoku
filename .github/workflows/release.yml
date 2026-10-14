@@ -1,0 +1,66 @@
+name: GitHub APK release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag matching versionName (for example v0.1.0)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Install SDK
+        run: sdkmanager 'platforms;android-37.0' 'build-tools;36.0.0'
+      - name: Test and lint
+        run: ./gradlew --no-daemon --max-workers=2 test lintRelease
+      - name: Build signed APK
+        env:
+          KEYDOKU_KEYSTORE_BASE64: ${{ secrets.KEYDOKU_KEYSTORE_BASE64 }}
+          KEYDOKU_STORE_PASSWORD: ${{ secrets.KEYDOKU_STORE_PASSWORD }}
+          KEYDOKU_KEY_ALIAS: ${{ secrets.KEYDOKU_KEY_ALIAS }}
+          KEYDOKU_KEY_PASSWORD: ${{ secrets.KEYDOKU_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          : "${KEYDOKU_KEYSTORE_BASE64:?Configure the release keystore secret}"
+          : "${KEYDOKU_STORE_PASSWORD:?Configure the store password secret}"
+          : "${KEYDOKU_KEY_ALIAS:?Configure the key alias secret}"
+          : "${KEYDOKU_KEY_PASSWORD:?Configure the key password secret}"
+          export KEYDOKU_KEYSTORE="$RUNNER_TEMP/keydoku-release.jks"
+          trap 'rm -f "$KEYDOKU_KEYSTORE"' EXIT
+          printf '%s' "$KEYDOKU_KEYSTORE_BASE64" | base64 --decode > "$KEYDOKU_KEYSTORE"
+          ./gradlew --no-daemon --max-workers=2 assembleRelease
+          "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify --verbose --print-certs app/build/outputs/apk/release/app-release.apk
+      - name: Prepare release assets
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          version=$("$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging app/build/outputs/apk/release/app-release.apk | sed -n "s/.*versionName='\([^']*\)'.*/\1/p")
+          test "$RELEASE_TAG" = "v$version"
+          mkdir -p dist
+          cp app/build/outputs/apk/release/app-release.apk dist/keydoku.apk
+          cd dist
+          sha256sum keydoku.apk > SHA256SUMS
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/keydoku.apk dist/SHA256SUMS \
+            --verify-tag --draft --title "Keydoku $RELEASE_TAG" --generate-notes

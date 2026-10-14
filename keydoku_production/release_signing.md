@@ -1,5 +1,9 @@
 # Release Signing
 
+For the current GitHub/Obtainium release plan, follow
+[distribution and signing instructions](../docs/DISTRIBUTION.md). The Play
+upload-key instructions below are retained for a possible future Play release.
+
 Use Play App Signing in Google Play Console.
 
 ## Recommended Path

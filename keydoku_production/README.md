@@ -1,6 +1,11 @@
 # Keydoku Production Pack
 
-This folder contains the Google Play release checklist, listing copy, privacy policy text, and data-safety answers for Keydoku.
+The current distribution plan is signed APKs on GitHub Releases, with updates
+through Obtainium and a possible F-Droid submission. See
+[distribution instructions](../docs/DISTRIBUTION.md).
+
+This folder contains website assets, privacy policies, and archived Google
+Play preparation materials. Google Play publication is deferred.
 
 Store assets:
 
@@ -10,18 +15,19 @@ Store assets:
 - Privacy policy page: `privacy/index.html`
 - Static website for Cloudflare Pages: `website/`
 
-Build the Play upload artifact from the project root:
+Build the APK from the project root after configuring signing as documented:
 
 ```sh
-./gradlew --no-daemon --max-workers=1 bundleRelease
+./gradlew --no-daemon --max-workers=2 test lintRelease assembleRelease
 ```
 
-The generated local release bundle is at:
+The signed APK is at:
 
 ```text
-app/build/outputs/bundle/release/app-release.aab
+app/build/outputs/apk/release/app-release.apk
 ```
 
-For Play upload, sign the bundle with your Play upload key first. See `release_signing.md`.
+Without signing configuration, Gradle produces `app-release-unsigned.apk`,
+which cannot be installed or distributed.
 
 Do not commit release keystores or passwords.
