@@ -65,5 +65,3 @@ To change a key:
 1. Update `MainActivity.onKeyUp`.
 2. Update this document.
 3. Add or adjust an instrumentation test under `app/src/androidTest`.
-
-Keep all essential actions reachable from the keypad.
