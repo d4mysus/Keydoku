@@ -1,0 +1,21 @@
+<resources>
+    <color name="keydoku_background">#181C1F</color>
+    <color name="keydoku_ink">#EEF0EC</color>
+    <color name="keydoku_muted">#C4CCC7</color>
+    <color name="menu_surface">#252B2F</color>
+    <color name="menu_stroke">#637079</color>
+    <color name="menu_focused">#255E6F</color>
+    <color name="menu_focused_stroke">#9BD5E5</color>
+    <color name="menu_focused_text">#FAF9F6</color>
+    <color name="menu_pressed">#356E7F</color>
+    <color name="menu_disabled">#202529</color>
+    <color name="menu_disabled_stroke">#465057</color>
+    <color name="menu_disabled_text">#929C98</color>
+    <color name="board_muted">#C4CCC7</color>
+    <color name="board_entry">#9BD5FF</color>
+    <color name="board_error_text">#FFB4AD</color>
+    <color name="board_selected">#25566B</color>
+    <color name="board_related">#29382F</color>
+    <color name="board_match">#514627</color>
+    <color name="board_conflict">#612E35</color>
+</resources>

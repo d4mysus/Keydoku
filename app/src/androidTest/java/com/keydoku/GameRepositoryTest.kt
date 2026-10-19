@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.keydoku.data.GameRepository
+import com.keydoku.game.Appearance
 import com.keydoku.game.GameController
+import com.keydoku.game.GameSettings
 import org.json.JSONObject
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -24,6 +26,42 @@ class GameRepositoryTest {
 
     @After
     fun clearAfter() { preferences.edit().clear().commit() }
+
+    @Test
+    fun everyAppearanceSurvivesRepositoryReloadAndSavedGameRoundTrip() {
+        Appearance.entries.forEach { appearance ->
+            val settings = GameSettings(sound = true, appearance = appearance)
+            val controller = GameController()
+            controller.updateSettings(settings)
+            GameRepository(context).apply {
+                saveSettings(settings)
+                saveState(controller.state)
+            }
+            val reloaded = GameRepository(context)
+            assertEquals(settings, reloaded.loadSettings())
+            assertEquals(controller.state, reloaded.loadState())
+        }
+    }
+
+    @Test
+    fun legacyAndUnknownAppearanceKeepOtherSettingsAndSavedGame() {
+        val repository = GameRepository(context)
+        assertEquals(Appearance.SYSTEM, repository.loadSettings().appearance)
+        val controller = GameController()
+        controller.updateSettings(GameSettings(sound = true, haptics = true))
+        repository.saveSettings(controller.state.settings)
+        repository.saveState(controller.state)
+        val settings = JSONObject(preferences.getString("settings", null)!!)
+        val state = JSONObject(preferences.getString("active_state", null)!!)
+        for (appearance in listOf(null, "UNKNOWN_FUTURE_VALUE")) {
+            settings.put("appearance", appearance)
+            state.getJSONObject("settings").put("appearance", appearance)
+            preferences.edit().putString("settings", settings.toString())
+                .putString("active_state", state.toString()).commit()
+            assertEquals(controller.state.settings, repository.loadSettings())
+            assertEquals(controller.state, repository.loadState())
+        }
+    }
 
     @Test
     fun completionMarkerSurvivesSavingAnUndonePuzzle() {

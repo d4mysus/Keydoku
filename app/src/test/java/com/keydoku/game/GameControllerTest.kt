@@ -11,6 +11,33 @@ import kotlin.random.Random
 
 class GameControllerTest {
     @Test
+    fun appearanceDefaultsToSystemAndChangesPreservePuzzleAndHistory() {
+        val controller = seededController()
+        assertEquals(Appearance.SYSTEM, controller.state.settings.appearance)
+        controller.select(firstEditable(controller))
+        controller.toggleNotesMode()
+        controller.enterDigit(3)
+        controller.enterDigit(6)
+        controller.undo()
+        controller.updateElapsed(12_000L)
+        val before = controller.state
+        Appearance.entries.forEach { appearance ->
+            val settings = before.settings.copy(appearance = appearance)
+            controller.updateSettings(settings)
+            assertEquals(before.copy(settings = settings), controller.state)
+            assertTrue(controller.canUndo())
+            assertTrue(controller.canRedo())
+        }
+        controller.redo()
+        assertEquals(setOf(3, 6), controller.state.notes[before.selected.index])
+        assertEquals(Appearance.DARK, controller.state.settings.appearance)
+        assertEquals(12_000L, controller.state.elapsedMillis)
+        controller.undo()
+        assertEquals(before.notes, controller.state.notes)
+        assertEquals(Appearance.DARK, controller.state.settings.appearance)
+    }
+
+    @Test
     fun undoAndRedoPreserveElapsedTimeAndSettings() {
         val controller = seededController()
         controller.select(firstEditable(controller))

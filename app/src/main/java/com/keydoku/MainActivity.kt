@@ -9,9 +9,11 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Typeface
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.media.AudioManager
@@ -22,6 +24,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.view.ContextThemeWrapper
 import android.view.Gravity
 import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
@@ -31,6 +34,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import android.window.OnBackInvokedDispatcher
@@ -38,6 +42,7 @@ import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import com.keydoku.data.GameRepository
 import com.keydoku.domain.Difficulty
+import com.keydoku.game.Appearance
 import com.keydoku.game.GameController
 import com.keydoku.game.GameSettings
 import com.keydoku.game.GameState
@@ -50,6 +55,11 @@ class MainActivity : Activity() {
     private val buyMeCoffeeUrl = "https://buymeacoffee.com/d4mysus"
     private lateinit var repository: GameRepository
     private lateinit var controller: GameController
+    private lateinit var uiContext: Context
+    private var appliedNightMode: Int? = null
+    private var redrawMenu: (() -> Unit)? = null
+    private var activeDialog: AlertDialog? = null
+    private var redrawDialog: (() -> Unit)? = null
     private lateinit var gameScreen: LinearLayout
     private lateinit var menuScreen: LinearLayout
     private lateinit var boardView: SudokuBoardView
@@ -95,7 +105,7 @@ class MainActivity : Activity() {
             repository.saveStats(stats)
         }
 
-        setContentView(buildLayout())
+        applyAppearance()
         registerBackMenu()
         resetTimerAnchor()
         showGameScreen()
@@ -109,6 +119,7 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        applyAppearance()
         resetTimerAnchor()
         handler.post(tick)
     }
@@ -127,6 +138,57 @@ class MainActivity : Activity() {
         toneGenerator?.release()
         toneGenerator = null
     }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        applyAppearance()
+    }
+
+    @Suppress("DEPRECATION") // Native system-bar flags support the app's API 23 minimum.
+    private fun applyAppearance() {
+        val nightMode = when (controller.state.settings.appearance) {
+            Appearance.LIGHT -> Configuration.UI_MODE_NIGHT_NO
+            Appearance.DARK -> Configuration.UI_MODE_NIGHT_YES
+            Appearance.SYSTEM -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES) {
+                Configuration.UI_MODE_NIGHT_YES
+            } else Configuration.UI_MODE_NIGHT_NO
+        }
+        if (nightMode == appliedNightMode) return
+        val focusedIndex = currentMenuButtons.indexOfFirst { it.hasFocus() }
+        val menu = redrawMenu
+        val dialog = redrawDialog.takeIf { activeDialog?.isShowing == true }
+        activeDialog?.dismiss()
+        val configuration = Configuration(resources.configuration).apply {
+            uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightMode
+        }
+        // A local resource context keeps manual overrides separate from system configuration.
+        uiContext = ContextThemeWrapper(this, R.style.AppTheme).apply {
+            applyOverrideConfiguration(configuration)
+        }
+        appliedNightMode = nightMode
+        val background = color(R.color.keydoku_background)
+        window.setBackgroundDrawable(ColorDrawable(background))
+        window.statusBarColor = background
+        window.navigationBarColor = background
+        val lightBars = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+        window.decorView.systemUiVisibility = if (nightMode == Configuration.UI_MODE_NIGHT_NO) {
+            window.decorView.systemUiVisibility or lightBars
+        } else {
+            window.decorView.systemUiVisibility and lightBars.inv()
+        }
+        setContentView(buildLayout())
+        render()
+        if (currentScreen == Screen.GAME) {
+            boardView.requestFocus()
+        } else {
+            menu?.invoke()
+            menuScreen.post { currentMenuButtons.getOrNull(focusedIndex)?.requestFocus() }
+        }
+        dialog?.invoke()
+    }
+
+    private fun color(id: Int): Int = uiContext.getColor(id)
 
     @Deprecated("Use OnBackPressedDispatcher in new AndroidX activities.")
     // Legacy devices use this path; API 33+ uses registerBackMenu's platform callback.
@@ -193,8 +255,8 @@ class MainActivity : Activity() {
     }
 
     private fun buildLayout(): View {
-        val root = FrameLayout(this).apply {
-            setBackgroundColor(Colors.BACKGROUND)
+        val root = FrameLayout(uiContext).apply {
+            setBackgroundColor(color(R.color.keydoku_background))
             setOnApplyWindowInsetsListener { view, insets ->
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     val bars = insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.displayCutout())
@@ -208,11 +270,11 @@ class MainActivity : Activity() {
             }
         }
         gameScreen = buildGameScreen()
-        menuScreen = LinearLayout(this).apply {
+        menuScreen = LinearLayout(uiContext).apply {
             id = R.id.menu_screen
             orientation = LinearLayout.VERTICAL
             visibility = View.GONE
-            setBackgroundColor(Colors.BACKGROUND)
+            setBackgroundColor(color(R.color.keydoku_background))
             setPadding(dp(14), dp(10), dp(14), dp(10))
         }
         root.addView(gameScreen)
@@ -229,31 +291,31 @@ class MainActivity : Activity() {
     }
 
     private fun buildGameScreen(): LinearLayout {
-        val root = LinearLayout(this).apply {
+        val root = LinearLayout(uiContext).apply {
             orientation = LinearLayout.VERTICAL
-            setBackgroundColor(Colors.BACKGROUND)
+            setBackgroundColor(color(R.color.keydoku_background))
             setPadding(dp(6), dp(2), dp(6), dp(4))
         }
 
-        val topBar = LinearLayout(this).apply {
+        val topBar = LinearLayout(uiContext).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
         }
-        val titleView = TextView(this).apply {
+        val titleView = TextView(uiContext).apply {
             text = "Keydoku"
             textSize = 18f
-            setTextColor(Colors.INK)
+            setTextColor(color(R.color.keydoku_ink))
             setTypeface(typeface, Typeface.BOLD)
         }
-        statusView = TextView(this).apply {
+        statusView = TextView(uiContext).apply {
             textSize = 13f
             gravity = Gravity.END
-            setTextColor(Colors.MUTED)
+            setTextColor(color(R.color.keydoku_muted))
         }
         topBar.addView(titleView, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         topBar.addView(statusView, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 2f))
 
-        boardView = SudokuBoardView(this).apply {
+        boardView = SudokuBoardView(uiContext).apply {
             id = R.id.sudoku_board
             onCellSelected = { index ->
                 captureElapsed()
@@ -261,20 +323,20 @@ class MainActivity : Activity() {
             }
         }
 
-        val statusStrip = LinearLayout(this).apply {
+        val statusStrip = LinearLayout(uiContext).apply {
             id = R.id.status_strip
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(4), dp(6), dp(4), 0)
         }
-        stripPrimaryView = TextView(this).apply {
+        stripPrimaryView = TextView(uiContext).apply {
             textSize = 18f
-            setTextColor(Colors.INK)
+            setTextColor(color(R.color.keydoku_ink))
             gravity = Gravity.CENTER
         }
-        stripKeysView = TextView(this).apply {
+        stripKeysView = TextView(uiContext).apply {
             textSize = 14f
-            setTextColor(Colors.MUTED)
+            setTextColor(color(R.color.keydoku_muted))
             gravity = Gravity.CENTER
         }
         statusStrip.addView(stripPrimaryView, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
@@ -300,6 +362,7 @@ class MainActivity : Activity() {
             Screen.DONATE_BITCOIN,
             Screen.DONATE_COFFEE -> showDonateScreen()
             Screen.PRIVACY -> showSettingsScreen()
+            Screen.APPEARANCE -> showSettingsScreen()
             else -> showGameMenu()
         }
     }
@@ -371,12 +434,13 @@ class MainActivity : Activity() {
 
     private fun startNewGame(difficulty: Difficulty) {
         if (!controller.state.completed && controller.state.elapsedMillis > 0L) {
-            AlertDialog.Builder(this)
+            activeDialog = AlertDialog.Builder(uiContext)
                 .setTitle("Start new game?")
                 .setMessage("This will replace your current ${controller.state.difficulty.displayName} puzzle.")
                 .setPositiveButton("Start") { _, _ -> createNewGame(difficulty) }
                 .setNegativeButton("Cancel", null)
                 .show()
+            redrawDialog = { startNewGame(difficulty) }
         } else {
             createNewGame(difficulty)
         }
@@ -410,7 +474,7 @@ class MainActivity : Activity() {
         val settings = controller.state.settings
         showMenuScreen(
             title = "Settings",
-            body = "OK toggles a setting",
+            body = "OK changes a setting",
             actions = listOf(
                 toggleAction("Mistake check", settings.mistakeChecking) {
                     settings.copy(mistakeChecking = !settings.mistakeChecking)
@@ -427,6 +491,7 @@ class MainActivity : Activity() {
                 toggleAction("Sound", settings.sound) {
                     settings.copy(sound = !settings.sound)
                 },
+                MenuAction("Appearance: ${settings.appearance.displayName}") { showAppearanceScreen() },
                 MenuAction("Privacy") { showPrivacyScreen() },
                 MenuAction("Back") { showGameMenu() },
             )
@@ -445,6 +510,25 @@ class MainActivity : Activity() {
             renderAndSave()
             showSettingsScreen()
         }
+
+    private fun showAppearanceScreen() {
+        currentScreen = Screen.APPEARANCE
+        showMenuScreen(
+            title = "Appearance",
+            actions = Appearance.entries.mapIndexed { index, appearance ->
+                val selected = appearance == controller.state.settings.appearance
+                MenuAction(appearance.displayName + if (selected) " (selected)" else "", shortcut = index + 1) {
+                    val settings = controller.state.settings.copy(appearance = appearance)
+                    controller.updateSettings(settings)
+                    repository.saveSettings(settings)
+                    applyAppearance()
+                    renderAndSave()
+                    showAppearanceScreen()
+                    menuScreen.post { currentMenuButtons[index].requestFocus() }
+                }
+            } + MenuAction("Back", shortcut = 0) { showSettingsScreen() }
+        )
+    }
 
     private fun showHelpScreen() {
         currentScreen = Screen.HELP
@@ -543,47 +627,48 @@ class MainActivity : Activity() {
         imageBitmap: Bitmap? = null,
         bodyCentered: Boolean = false,
     ) {
+        redrawMenu = { showMenuScreen(title, body, actions, imageBitmap, bodyCentered) }
         gameScreen.visibility = View.GONE
         menuScreen.visibility = View.VISIBLE
         menuScreen.removeAllViews()
         currentMenuButtons = emptyList()
         menuButtonsByShortcut.clear()
 
-        val titleView = TextView(this).apply {
+        val titleView = TextView(uiContext).apply {
             id = R.id.menu_title
             text = title
             textSize = 24f
-            setTextColor(Colors.INK)
+            setTextColor(color(R.color.keydoku_ink))
             setTypeface(typeface, Typeface.BOLD)
         }
-        val bodyView = TextView(this).apply {
+        val bodyView = TextView(uiContext).apply {
             text = body
             textSize = 14f
-            setTextColor(Colors.MUTED)
+            setTextColor(color(R.color.keydoku_muted))
             gravity = if (bodyCentered) Gravity.CENTER_HORIZONTAL else Gravity.START
             setLineSpacing(dp(2).toFloat(), 1.0f)
             setPadding(0, dp(4), 0, dp(6))
         }
         val imageView = imageBitmap?.let { bitmap ->
-            ImageView(this).apply {
+            ImageView(uiContext).apply {
                 setImageBitmap(bitmap)
                 setBackgroundColor(Color.WHITE)
                 adjustViewBounds = true
                 setPadding(dp(4), dp(4), dp(4), dp(4))
             }
         }
-        val list = LinearLayout(this).apply {
+        val list = LinearLayout(uiContext).apply {
             orientation = LinearLayout.VERTICAL
         }
-        val footerView = TextView(this).apply {
+        val footerView = TextView(uiContext).apply {
             text = if (currentScreen == Screen.SETTINGS) {
-                "↑↓ Move     OK Toggle     Back Return"
+                "↑↓ Move     OK Change     Back Return"
             } else {
                 "↑↓ Move     OK Select     Back Return"
             }
             textSize = 12f
             gravity = Gravity.CENTER
-            setTextColor(Colors.MUTED)
+            setTextColor(color(R.color.keydoku_muted))
             setPadding(0, dp(6), 0, 0)
         }
 
@@ -601,9 +686,10 @@ class MainActivity : Activity() {
         if (body.isNotBlank()) {
             menuScreen.addView(bodyView, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
         } else {
-            menuScreen.addView(View(this), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(6)))
+            menuScreen.addView(View(uiContext), LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(6)))
         }
-        menuScreen.addView(list, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
+        menuScreen.addView(ScrollView(uiContext).apply { addView(list) },
+            LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f))
         menuScreen.addView(footerView, LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT)
 
         val buttons = mutableListOf<Button>()
@@ -620,7 +706,7 @@ class MainActivity : Activity() {
     }
 
     private fun menuButton(action: MenuAction): Button =
-        Button(this).apply {
+        Button(uiContext).apply {
             text = menuLabel(action, focused = false)
             textSize = 15f
             gravity = Gravity.CENTER_VERTICAL
@@ -650,7 +736,7 @@ class MainActivity : Activity() {
         val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         for (y in 0 until size) {
             for (x in 0 until size) {
-                bitmap.setPixel(x, y, if (matrix[x, y]) Colors.INK else Color.WHITE)
+                bitmap.setPixel(x, y, if (matrix[x, y]) Color.rgb(29, 29, 27) else Color.WHITE)
             }
         }
         return bitmap
@@ -666,19 +752,19 @@ class MainActivity : Activity() {
         StateListDrawable().apply {
             addState(
                 intArrayOf(-android.R.attr.state_enabled),
-                roundedFill(Colors.MENU_DISABLED, strokeColor = Colors.MENU_DISABLED_STROKE)
+                roundedFill(color(R.color.menu_disabled), strokeColor = color(R.color.menu_disabled_stroke))
             )
             addState(
                 intArrayOf(android.R.attr.state_focused),
-                roundedFill(Colors.MENU_FOCUSED, strokeColor = Colors.MENU_FOCUSED_STROKE)
+                roundedFill(color(R.color.menu_focused), strokeColor = color(R.color.menu_focused_stroke))
             )
             addState(
                 intArrayOf(android.R.attr.state_pressed),
-                roundedFill(Colors.MENU_PRESSED, strokeColor = Colors.MENU_FOCUSED_STROKE)
+                roundedFill(color(R.color.menu_pressed), strokeColor = color(R.color.menu_focused_stroke))
             )
             addState(
                 intArrayOf(),
-                roundedFill(Colors.MENU_SURFACE, strokeColor = Colors.MENU_STROKE)
+                roundedFill(color(R.color.menu_surface), strokeColor = color(R.color.menu_stroke))
             )
         }
 
@@ -698,17 +784,18 @@ class MainActivity : Activity() {
                 intArrayOf(android.R.attr.state_pressed),
                 intArrayOf(),
             ),
-            intArrayOf(Colors.MENU_DISABLED_TEXT, Colors.MENU_FOCUSED_TEXT, Colors.MENU_FOCUSED_TEXT, Colors.INK)
+            intArrayOf(color(R.color.menu_disabled_text), color(R.color.menu_focused_text), color(R.color.menu_focused_text), color(R.color.keydoku_ink))
         )
 
     private fun showCompletedDialog(state: GameState) {
-        AlertDialog.Builder(this)
+        activeDialog = AlertDialog.Builder(uiContext)
             .setTitle("Puzzle complete")
             .setMessage("${state.difficulty.displayName} finished in ${formatTime(state.elapsedMillis)}")
             .setPositiveButton("New game") { _, _ -> showDifficultyScreen() }
             .setNegativeButton("Stats") { _, _ -> showStatsScreen() }
             .setNeutralButton("Board") { _, _ -> showGameScreen() }
             .show()
+        redrawDialog = { showCompletedDialog(controller.state) }
     }
 
     private fun afterAction(before: GameState, after: GameState = controller.state) {
@@ -824,26 +911,12 @@ class MainActivity : Activity() {
         DIFFICULTY,
         STATS,
         SETTINGS,
+        APPEARANCE,
         HELP,
         DONATE,
         DONATE_BITCOIN,
         DONATE_COFFEE,
         PRIVACY,
-    }
-
-    private object Colors {
-        const val BACKGROUND = 0xFFFAF9F6.toInt()
-        const val INK = 0xFF1D1D1B.toInt()
-        const val MUTED = 0xFF303633.toInt()
-        const val MENU_SURFACE = 0xFFF0EFEA.toInt()
-        const val MENU_STROKE = 0xFFD6D4CC.toInt()
-        const val MENU_FOCUSED = 0xFF255E6F.toInt()
-        const val MENU_FOCUSED_STROKE = 0xFF1D1D1B.toInt()
-        const val MENU_FOCUSED_TEXT = 0xFFFAF9F6.toInt()
-        const val MENU_PRESSED = 0xFF4D7C8A.toInt()
-        const val MENU_DISABLED = 0xFFE8E5DD.toInt()
-        const val MENU_DISABLED_STROKE = 0xFFD6D2C8.toInt()
-        const val MENU_DISABLED_TEXT = 0xFF8B8A84.toInt()
     }
 
     companion object {

@@ -4,6 +4,7 @@ import android.content.Context
 import com.keydoku.domain.CellIndex
 import com.keydoku.domain.Difficulty
 import com.keydoku.domain.SudokuBoard
+import com.keydoku.game.Appearance
 import com.keydoku.game.DifficultyStats
 import com.keydoku.game.GameSettings
 import com.keydoku.game.GameState
@@ -86,6 +87,7 @@ class GameRepository(context: Context) {
             .put("highlightMatchingDigits", settings.highlightMatchingDigits)
             .put("haptics", settings.haptics)
             .put("sound", settings.sound)
+            .put("appearance", settings.appearance.name)
             .toString()
 
     private fun decodeSettings(raw: String?): GameSettings =
@@ -98,6 +100,8 @@ class GameRepository(context: Context) {
                 highlightMatchingDigits = json.optBoolean("highlightMatchingDigits", true),
                 haptics = json.optBoolean("haptics", false),
                 sound = json.optBoolean("sound", false),
+                appearance = Appearance.entries.firstOrNull { it.name == json.optString("appearance") }
+                    ?: Appearance.SYSTEM,
             )
         }.getOrDefault(GameSettings())
 
