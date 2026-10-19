@@ -2,12 +2,12 @@ package com.keydoku.ui
 
 import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
+import com.keydoku.R
 import com.keydoku.domain.CellIndex
 import com.keydoku.domain.SudokuBoard
 import com.keydoku.game.GameState
@@ -23,17 +23,17 @@ class SudokuBoardView @JvmOverloads constructor(
 
     private val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     private val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Colors.INK
+        color = context.getColor(R.color.keydoku_ink)
         style = Paint.Style.STROKE
         strokeCap = Paint.Cap.SQUARE
     }
     private val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Colors.INK
+        color = context.getColor(R.color.keydoku_ink)
         textAlign = Paint.Align.CENTER
         typeface = android.graphics.Typeface.create(android.graphics.Typeface.SANS_SERIF, android.graphics.Typeface.BOLD)
     }
     private val notePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Colors.MUTED
+        color = context.getColor(R.color.board_muted)
         textAlign = Paint.Align.CENTER
         typeface = android.graphics.Typeface.create(android.graphics.Typeface.MONOSPACE, android.graphics.Typeface.NORMAL)
     }
@@ -99,10 +99,10 @@ class SudokuBoardView @JvmOverloads constructor(
                 val sameDigit = selectedValue != SudokuBoard.EMPTY &&
                     snapshot.current.valueAt(row, column) == selectedValue
                 val color = when {
-                    snapshot.settings.mistakeChecking && index in snapshot.conflictIndexes -> Colors.CONFLICT
-                    isSelected -> Colors.SELECTED
-                    snapshot.settings.highlightMatchingDigits && sameDigit -> Colors.MATCH
-                    snapshot.settings.highlightRelated && sameUnit -> Colors.RELATED
+                    snapshot.settings.mistakeChecking && index in snapshot.conflictIndexes -> context.getColor(R.color.board_conflict)
+                    isSelected -> context.getColor(R.color.board_selected)
+                    snapshot.settings.highlightMatchingDigits && sameDigit -> context.getColor(R.color.board_match)
+                    snapshot.settings.highlightRelated && sameUnit -> context.getColor(R.color.board_related)
                     else -> null
                 }
                 if (color != null) {
@@ -133,9 +133,9 @@ class SudokuBoardView @JvmOverloads constructor(
                 val centerY = row * cell + cell / 2f
                 if (value != SudokuBoard.EMPTY) {
                     textPaint.color = when {
-                        index in snapshot.givenIndexes -> Colors.INK
-                        snapshot.settings.mistakeChecking && value != snapshot.solution.valueAt(row, column) -> Colors.ERROR_TEXT
-                        else -> Colors.ENTRY
+                        index in snapshot.givenIndexes -> context.getColor(R.color.keydoku_ink)
+                        snapshot.settings.mistakeChecking && value != snapshot.solution.valueAt(row, column) -> context.getColor(R.color.board_error_text)
+                        else -> context.getColor(R.color.board_entry)
                     }
                     canvas.drawText(value.toString(), centerX, centerY - textOffset, textPaint)
                 } else {
@@ -170,16 +170,5 @@ class SudokuBoardView @JvmOverloads constructor(
             canvas.drawLine(position, 0f, position, cell * 9, linePaint)
             canvas.drawLine(0f, position, cell * 9, position, linePaint)
         }
-    }
-
-    private object Colors {
-        val INK = Color.rgb(29, 29, 27)
-        val MUTED = Color.rgb(97, 102, 106)
-        val ENTRY = Color.rgb(28, 95, 128)
-        val ERROR_TEXT = Color.rgb(150, 38, 38)
-        val SELECTED = Color.rgb(168, 213, 226)
-        val RELATED = Color.rgb(230, 237, 220)
-        val MATCH = Color.rgb(242, 219, 143)
-        val CONFLICT = Color.rgb(245, 197, 190)
     }
 }

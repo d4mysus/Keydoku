@@ -6,4 +6,9 @@ data class GameSettings(
     val highlightMatchingDigits: Boolean = true,
     val haptics: Boolean = false,
     val sound: Boolean = false,
+    val appearance: Appearance = Appearance.SYSTEM,
 )
+
+enum class Appearance(val displayName: String) {
+    SYSTEM("System"), LIGHT("Light"), DARK("Dark"),
+}
