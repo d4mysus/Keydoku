@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.1.3
+
+- Added Settings → Appearance with System (default), Light, and Dark options.
+- System follows Android 10+ appearance; older Android versions default to light.
+- Appearance changes preserve the current puzzle, timer, notes, and undo/redo history.
+- Added a dark palette for the board, menus, native dialogs, and system bars.
+- Menus scroll so all settings remain reachable on smaller screens.
+
+Uses the existing signing key; install over 0.1.1 or 0.1.2 to preserve local progress.
+Version code: 4.
+
 ## 0.1.2
 
 - Updated launcher and website artwork from the supplied SVG icon pack.

@@ -1,0 +1,1 @@
+New Appearance setting: System, Light, or Dark. Switch instantly without resetting your puzzle or history. Dark colors cover the board, menus, and dialogs. Menus scroll on small screens. Updates preserve progress and settings.
