@@ -1,11 +1,10 @@
 <resources>
-    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
+    <style name="BaseAppTheme" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowBackground">@color/keydoku_background</item>
         <item name="android:navigationBarColor">@color/keydoku_background</item>
         <item name="android:statusBarColor">@color/keydoku_background</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:forceDarkAllowed">false</item>
         <item name="android:colorAccent">@color/board_entry</item>
     </style>
 </resources>
